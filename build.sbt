@@ -8,7 +8,7 @@ lazy val root = project
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq( // += から ++= に変更し、Seq で複数の依存関係を追加
       // OpenAI
-      "io.cequence" %% "openai-scala-client" % "1.1.2",
+      "io.cequence" %% "openai-scala-client" % "1.2.0",
       // Circe (JSON)
       "io.circe" %% "circe-core" % "0.14.6",
       "io.circe" %% "circe-generic" % "0.14.6",
