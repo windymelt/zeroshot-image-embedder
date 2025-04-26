@@ -20,7 +20,8 @@ lazy val root = project
 
     // マージ戦略（特にAkkaを使用する場合に必要）
     assembly / assemblyMergeStrategy := {
-      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case PathList("META-INF", "services", xs @ _*) => MergeStrategy.concat
+      case PathList("META-INF", xs @ _*)             => MergeStrategy.discard
       case "module-info.class" => MergeStrategy.discard // module-info.class を破棄
       case PathList("reference.conf") => MergeStrategy.concat
       case "application.conf"         => MergeStrategy.concat
@@ -32,17 +33,12 @@ lazy val root = project
     libraryDependencies ++= Seq(
       // OpenAI
       "io.cequence" %% "openai-scala-client" % "1.2.0",
-      // Circe (JSON)
-      "io.circe" %% "circe-core" % "0.14.6",
-      "io.circe" %% "circe-generic" % "0.14.6",
-      "io.circe" %% "circe-parser" % "0.14.6",
+      "io.bullet" %% "borer-core" % "1.10.3",
       // os-lib (File I/O, Env Vars)
       "com.lihaoyi" %% "os-lib" % "0.9.3",
       // Scrimage (Image Processing)
       "com.sksamuel.scrimage" % "scrimage-core" % "4.3.1",
       "com.sksamuel.scrimage" % "scrimage-formats-extra" % "4.3.1", // For JPEG, PNG etc.
-      // Commons Codec (Base64) - scrimage が Base64 を直接サポートしない場合に備える
-      "commons-codec" % "commons-codec" % "1.16.0",
       // Test dependency
       "org.scalameta" %% "munit" % "1.0.0" % Test
     )
