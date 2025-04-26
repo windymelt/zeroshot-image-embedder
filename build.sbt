@@ -1,12 +1,35 @@
+import sbtassembly.AssemblyPlugin.defaultUniversalScript
+
 val scala3Version = "3.6.4"
 
 lazy val root = project
   .in(file("."))
   .settings(
-    name := "zeroshot image embedder",
+    name := "zeroshot-image-embedder",
     version := "0.1.0-SNAPSHOT",
     scalaVersion := scala3Version,
-    libraryDependencies ++= Seq( // += から ++= に変更し、Seq で複数の依存関係を追加
+
+    // アセンブリ設定
+    assembly / mainClass := Some("Main"),
+    assembly / assemblyJarName := "zeroshot-image-embedder.jar",
+
+    // シェルスクリプトプレペンド設定
+    assembly / assemblyPrependShellScript := Some(
+      defaultUniversalScript(shebang = false)
+    ),
+
+    // マージ戦略（特にAkkaを使用する場合に必要）
+    assembly / assemblyMergeStrategy := {
+      case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+      case "module-info.class" => MergeStrategy.discard // module-info.class を破棄
+      case PathList("reference.conf") => MergeStrategy.concat
+      case "application.conf"         => MergeStrategy.concat
+      case x if x.endsWith(".conf")   => MergeStrategy.concat
+      case x =>
+        val oldStrategy = (assembly / assemblyMergeStrategy).value
+        oldStrategy(x)
+    },
+    libraryDependencies ++= Seq(
       // OpenAI
       "io.cequence" %% "openai-scala-client" % "1.2.0",
       // Circe (JSON)
