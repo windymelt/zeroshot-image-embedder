@@ -39,42 +39,34 @@ object Main {
     eprintln("Zero-shot Image Embedder")
     eprintln("画像を処理し、OpenAI APIでラベル付け、ベクトル化します")
 
-    // コマンドライン引数のチェック
     if (args.isEmpty) {
-      System.err.println("使用方法: [プログラム] <画像ファイルパス>")
-      System.exit(1)
+      eprintln("使用方法: [プログラム] <画像ファイルパス>")
+      sys.exit(1)
     }
 
     val imagePathStr = args.head
     val imageFile = new File(imagePathStr)
 
-    // ファイル存在チェック
     if (!imageFile.exists() || !imageFile.isFile) {
-      System.err.println(s"指定されたファイル '$imagePathStr' が見つかりません")
-      System.exit(1)
+      eprintln(s"指定されたファイル '$imagePathStr' が見つかりません")
+      sys.exit(1)
     }
 
     eprintln(s"画像ファイル: $imagePathStr")
 
-    // APIトークンのチェック
     val apiToken = sys.env.get("OPENAI_TOKEN").getOrElse {
-      System.err.println("環境変数 OPENAI_TOKEN が設定されていません")
-      System.exit(1)
-      "" // コンパイル用（実際には到達しない）
+      eprintln("環境変数 OPENAI_TOKEN が設定されていません")
+      sys.exit(1)
     }
     eprintln("環境変数 OPENAI_TOKEN が設定されています")
 
-    // ActorSystem の作成 (OpenAI Client の要件)
     implicit val system = ActorSystem("OpenAIClientSystem")
 
-    // OpenAI サービスの初期化
     try {
-      // サービスの初期化
       val openAIService = OpenAIServiceFactory(apiToken)
 
       val fileVec =
         try {
-          // 画像処理
           eprintln("画像を処理しています...")
           val image = ImmutableImage.loader().fromFile(imageFile)
           eprintln(s"画像サイズ: ${image.width}x${image.height}")
@@ -115,7 +107,6 @@ object Main {
 
           eprintln("Response API からレスポンスを受信しました")
 
-          // レスポンスから文章を抽出
           val imageLabel = visionResponse.outputText.headOption
             .getOrElse(
               throw new RuntimeException("Vision API から有効なレスポンスを取得できませんでした")
@@ -123,7 +114,6 @@ object Main {
 
           eprintln(s"画像ラベル: ${imageLabel}")
 
-          // Embedding API 呼び出し
           eprintln("Embedding API を呼び出しています...")
 
           val embeddingSettings = CreateEmbeddingsSettings(
@@ -137,7 +127,6 @@ object Main {
 
           eprintln("Embedding API からレスポンスを受信しました")
 
-          // レスポンスからベクトルを抽出
           val embeddingVector = embeddingResponse.data.headOption
             .map(_.embedding)
             .getOrElse(
@@ -149,11 +138,10 @@ object Main {
           embeddingVector
         } catch {
           case e: Exception =>
-            System.err.println(s"APIの呼び出し中にエラーが発生しました: ${e.getMessage}")
+            eprintln(s"APIの呼び出し中にエラーが発生しました: ${e.getMessage}")
             e.printStackTrace()
             sys.exit(1)
         } finally {
-          // OpenAIサービスのクローズ
           openAIService.close()
         }
 
