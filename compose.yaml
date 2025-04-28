@@ -5,3 +5,9 @@ services:
       - 7700:7700
     volumes:
       - ./meili_data:/meili_data
+  valkey:
+    image: valkey/valkey:7.2 # Valkeyのイメージを指定
+    ports:
+      - 6379:6379 # デフォルトのRedisポート
+    volumes:
+      - ./valkey_data:/data # データ永続化用 (任意)

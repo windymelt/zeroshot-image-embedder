@@ -62,6 +62,10 @@ export default function Home() {
     }
   };
 
+  const getImageUrl = (filePath: string, width: number): string => {
+    return `/api/image?path=${encodeURIComponent(filePath)}&width=${width}`;
+  };
+
   return (
     <div className="container mt-5">
       <h1 className="mb-4">画像検索</h1>
@@ -99,13 +103,30 @@ export default function Home() {
       {!isLoading && searchResults.length > 0 && (
         <div>
           <h2>検索結果:</h2>
-          <ul className="list-group">
+          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
             {searchResults.map((filePath, index) => (
-              <li key={index} className="list-group-item">
-                {filePath}
-              </li>
+              <div key={index} className="col">
+                <div className="card h-100">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={getImageUrl(filePath, 200)} // width=200 を指定
+                    className="card-img-top"
+                    alt={`Search result ${index + 1}`}
+                    style={{ objectFit: 'cover', height: '200px' }} // 高さを固定し、画像をカバー
+                    onError={() => { // 引数 e を削除
+                      // 画像読み込みエラー時の処理 (例: 代替画像表示)
+                      console.error(`Failed to load image: ${filePath}`);
+                      // (e.target as HTMLImageElement).src = '/placeholder.png'; // 代替画像のパス
+                    }}
+                  />
+                  <div className="card-body">
+                    {/* 必要であればファイルパスなどを表示 */}
+                    {/* <p className="card-text small text-muted">{filePath}</p> */}
+                  </div>
+                </div>
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       )}
 
